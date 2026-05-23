@@ -21,30 +21,7 @@ http://127.0.0.1:4173
 
 ## Modello
 
-Il server usa OpenRouter con `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`, che al momento risponde correttamente con la chiave disponibile. `deepseek/deepseek-v4-flash:free` resta configurato come modello successivo, utile quando la chiave DeepSeek avra credito disponibile.
-
-Le chiavi non vengono inserite nell'HTML: il server le legge da `OPENROUTER_API_KEY` oppure dal file locale `../openrouter.local.json`, che resta fuori dalla cartella servita dal browser.
-
-## Pubblicazione online
-
-Per condividere l'app con altre persone senza fallback devi pubblicare tutta la cartella su un hosting che esegue Node.js, non solo `index.html`.
-
-Impostazioni tipiche su Render, Railway, Fly.io o un VPS:
-
-```text
-Build command: npm install
-Start command: npm start
-```
-
-Variabili d'ambiente da configurare nell'hosting:
-
-```text
-OPENROUTER_MODEL=nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
-OPENROUTER_API_KEY=la-tua-chiave-openrouter
-PUBLIC_ORIGIN=https://il-tuo-url-pubblico
-```
-
-Non caricare mai `openrouter.local.json` su GitHub o su una cartella pubblica: contiene chiavi reali. In produzione usa le variabili d'ambiente dell'hosting.
+Il server usa OpenRouter con `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`, che al momento risponde correttamente con la chiave disponibile. 
 
 ## Fallback locale
 
