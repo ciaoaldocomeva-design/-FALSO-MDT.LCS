@@ -1,0 +1,1453 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Macchina del Tempo Testuale</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #f4efe4;
+        --ink: #251f1a;
+        --muted: #6f6255;
+        --line: rgba(37, 31, 26, 0.18);
+        --accent: #8d2f35;
+        --accent-2: #246a73;
+        --surface: rgba(255, 252, 244, 0.76);
+        --soft: rgba(141, 47, 53, 0.08);
+        --radius: 8px;
+        --font-display: Georgia, "Times New Roman", serif;
+        --font-body: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background:
+          linear-gradient(90deg, rgba(37, 31, 26, 0.03) 1px, transparent 1px),
+          linear-gradient(180deg, rgba(37, 31, 26, 0.03) 1px, transparent 1px),
+          var(--paper);
+        background-size: 38px 38px;
+        color: var(--ink);
+        font-family: var(--font-body);
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .app {
+        min-height: 100vh;
+        padding: 28px;
+      }
+
+      .shell {
+        width: min(1380px, 100%);
+        margin: 0 auto;
+      }
+
+      .topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 22px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+      }
+
+      .brand-mark {
+        width: 48px;
+        height: 48px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        background: var(--surface);
+        border-radius: 8px;
+        box-shadow: 0 10px 26px rgba(37, 31, 26, 0.08);
+        flex: 0 0 auto;
+      }
+
+      .brand h1,
+      .chat-identity h1 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 1.05;
+      }
+
+      .brand p,
+      .chat-identity p,
+      .figure-card p,
+      .quote-source,
+      .source-note {
+        margin: 0;
+        color: var(--muted);
+      }
+
+      .selection-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .figure-card {
+        min-height: 314px;
+        display: grid;
+        grid-template-rows: 118px auto auto 1fr auto;
+        gap: 12px;
+        padding: 16px;
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        color: var(--ink);
+        text-align: left;
+        box-shadow: 0 14px 34px rgba(37, 31, 26, 0.08);
+        transition: transform 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+      }
+
+      .figure-card:hover,
+      .figure-card:focus-visible {
+        transform: translateY(-3px);
+        border-color: color-mix(in srgb, var(--accent), var(--line) 30%);
+        box-shadow: 0 18px 42px rgba(37, 31, 26, 0.12);
+        outline: none;
+      }
+
+      .glyph-frame {
+        min-height: 118px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0)),
+          var(--soft);
+        overflow: hidden;
+      }
+
+      .figure-card h2 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-size: 1.35rem;
+        letter-spacing: 0;
+        line-height: 1.1;
+      }
+
+      .meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        min-height: 30px;
+        padding: 5px 10px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.42);
+        color: var(--ink);
+        font-size: 0.83rem;
+        white-space: nowrap;
+      }
+
+      .mode-badge {
+        display: inline-flex;
+        align-items: center;
+        min-height: 38px;
+        padding: 8px 12px;
+        border: 1px solid color-mix(in srgb, var(--accent-2), var(--line) 44%);
+        border-radius: 999px;
+        background: color-mix(in srgb, var(--accent-2), white 88%);
+        color: var(--ink);
+        font-size: 0.86rem;
+        font-weight: 800;
+        white-space: nowrap;
+      }
+
+      .mode-badge.online {
+        border-color: color-mix(in srgb, var(--accent-2), var(--line) 20%);
+        background: color-mix(in srgb, var(--accent-2), white 80%);
+      }
+
+      .enter-card {
+        align-self: end;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--accent);
+        font-weight: 700;
+      }
+
+      .chat-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.35fr) minmax(360px, 0.78fr);
+        gap: 18px;
+        align-items: stretch;
+      }
+
+      .chat-column,
+      .document-panel {
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+        background: var(--surface);
+        box-shadow: 0 16px 38px rgba(37, 31, 26, 0.1);
+      }
+
+      .chat-column {
+        min-height: calc(100vh - 116px);
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+      }
+
+      .chat-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 16px;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .chat-title-block {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+      }
+
+      .icon-button {
+        width: 42px;
+        height: 42px;
+        display: inline-grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.48);
+        color: var(--ink);
+        flex: 0 0 auto;
+      }
+
+      .icon-button:hover,
+      .ghost-button:hover,
+      .primary-button:hover {
+        border-color: var(--accent);
+      }
+
+      .mini-glyph {
+        width: 64px;
+        height: 64px;
+        display: grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--soft);
+        flex: 0 0 auto;
+      }
+
+      .chat-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+
+      .field {
+        display: grid;
+        gap: 5px;
+      }
+
+      .field label {
+        font-size: 0.76rem;
+        color: var(--muted);
+        font-weight: 700;
+      }
+
+      .text-input,
+      .select-input,
+      .composer textarea {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.68);
+        color: var(--ink);
+        outline: none;
+      }
+
+      .text-input:focus,
+      .select-input:focus,
+      .composer textarea:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 82%);
+      }
+
+      .text-input {
+        width: 220px;
+        min-height: 38px;
+        padding: 8px 10px;
+      }
+
+      .select-input {
+        width: 224px;
+        min-height: 38px;
+        padding: 8px 10px;
+      }
+
+      .message-stream {
+        min-height: 420px;
+        max-height: calc(100vh - 286px);
+        overflow-y: auto;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .message {
+        width: min(78ch, 92%);
+        padding: 13px 15px;
+        border: 1px solid var(--line);
+        border-radius: var(--message-radius, 8px);
+        line-height: 1.55;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+
+      .message.assistant {
+        align-self: flex-start;
+        background: rgba(255, 255, 255, 0.6);
+        border-left: 4px solid var(--accent);
+        font-family: var(--font-era, var(--font-body));
+      }
+
+      .message.user {
+        align-self: flex-end;
+        background: color-mix(in srgb, var(--accent-2), white 84%);
+        border-color: color-mix(in srgb, var(--accent-2), white 54%);
+      }
+
+      .message.error {
+        border-left-color: #a6422d;
+        background: #fff2ec;
+      }
+
+      .typing {
+        width: fit-content;
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: var(--accent);
+        animation: pulse 900ms infinite ease-in-out;
+      }
+
+      .dot:nth-child(2) {
+        animation-delay: 140ms;
+      }
+
+      .dot:nth-child(3) {
+        animation-delay: 280ms;
+      }
+
+      @keyframes pulse {
+        0%, 80%, 100% {
+          opacity: 0.32;
+          transform: translateY(0);
+        }
+        40% {
+          opacity: 1;
+          transform: translateY(-3px);
+        }
+      }
+
+      .composer {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+        padding: 14px;
+        border-top: 1px solid var(--line);
+      }
+
+      .composer textarea {
+        min-height: 56px;
+        max-height: 160px;
+        resize: vertical;
+        padding: 12px 13px;
+      }
+
+      .primary-button,
+      .ghost-button {
+        min-height: 42px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 14px;
+        font-weight: 800;
+      }
+
+      .primary-button {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+      }
+
+      .primary-button:disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .ghost-button {
+        background: rgba(255, 255, 255, 0.48);
+        color: var(--ink);
+      }
+
+      .document-panel {
+        min-height: calc(100vh - 116px);
+        padding: 18px;
+        overflow: auto;
+      }
+
+      .document-panel h2,
+      .document-section h3 {
+        margin: 0;
+        font-family: var(--font-display);
+        letter-spacing: 0;
+      }
+
+      .document-panel h2 {
+        font-size: 1.45rem;
+      }
+
+      .document-section {
+        margin-top: 18px;
+        padding-top: 16px;
+        border-top: 1px solid var(--line);
+      }
+
+      .document-section h3 {
+        margin-bottom: 10px;
+        font-size: 1rem;
+      }
+
+      .fact-list {
+        display: grid;
+        gap: 9px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .fact-list li,
+      .quote-card {
+        padding: 10px 11px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.44);
+      }
+
+      .quote-card {
+        display: grid;
+        gap: 7px;
+      }
+
+      .quote-card blockquote {
+        margin: 0;
+        font-family: var(--font-display);
+        line-height: 1.45;
+      }
+
+      .context-lines {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .context-lines li {
+        display: grid;
+        grid-template-columns: 22px 1fr;
+        gap: 8px;
+        align-items: start;
+        line-height: 1.45;
+      }
+
+      .context-lines span {
+        width: 22px;
+        height: 22px;
+        display: inline-grid;
+        place-items: center;
+        border: 1px solid var(--line);
+        border-radius: 50%;
+        color: var(--accent);
+        font-size: 0.8rem;
+        font-weight: 800;
+      }
+
+      .source-note {
+        margin-top: 12px;
+        font-size: 0.82rem;
+        line-height: 1.4;
+      }
+
+      .dante {
+        --paper: #f3ead7;
+        --ink: #2b2119;
+        --muted: #766048;
+        --accent: #8f2634;
+        --accent-2: #0f6a64;
+        --surface: rgba(255, 249, 235, 0.82);
+        --soft: rgba(143, 38, 52, 0.09);
+        --font-display: Georgia, "Times New Roman", serif;
+        --font-era: Georgia, "Times New Roman", serif;
+        --message-radius: 6px 16px 16px 6px;
+      }
+
+      .leonardo {
+        --paper: #efe3c8;
+        --ink: #29231c;
+        --muted: #675d4b;
+        --accent: #6e5b2c;
+        --accent-2: #326b5d;
+        --surface: rgba(255, 250, 231, 0.82);
+        --soft: rgba(50, 107, 93, 0.1);
+        --font-display: "Palatino Linotype", Palatino, Georgia, serif;
+        --font-era: "Palatino Linotype", Palatino, Georgia, serif;
+        --message-radius: 8px;
+      }
+
+      .galileo {
+        --paper: #e9edf0;
+        --ink: #18242c;
+        --muted: #52616c;
+        --accent: #275d7c;
+        --accent-2: #a56e26;
+        --surface: rgba(250, 253, 255, 0.84);
+        --soft: rgba(39, 93, 124, 0.1);
+        --font-display: Baskerville, Georgia, serif;
+        --font-era: Baskerville, Georgia, serif;
+        --message-radius: 14px 6px 14px 6px;
+      }
+
+      .cesare {
+        --paper: #eee8dc;
+        --ink: #211f1b;
+        --muted: #685f55;
+        --accent: #8b1e2d;
+        --accent-2: #b58737;
+        --surface: rgba(252, 250, 244, 0.84);
+        --soft: rgba(181, 135, 55, 0.12);
+        --font-display: Georgia, "Times New Roman", serif;
+        --font-era: Georgia, "Times New Roman", serif;
+        --message-radius: 4px;
+      }
+
+      .socrate {
+        --paper: #edf0eb;
+        --ink: #1f2522;
+        --muted: #5b6560;
+        --accent: #356276;
+        --accent-2: #9c7b37;
+        --surface: rgba(252, 255, 251, 0.84);
+        --soft: rgba(53, 98, 118, 0.1);
+        --font-display: "Times New Roman", Georgia, serif;
+        --font-era: "Times New Roman", Georgia, serif;
+        --message-radius: 18px 18px 6px 18px;
+      }
+
+      .artemisia {
+        --paper: #f1e6dd;
+        --ink: #211a18;
+        --muted: #665653;
+        --accent: #7b2338;
+        --accent-2: #9f7b27;
+        --surface: rgba(255, 248, 241, 0.84);
+        --soft: rgba(123, 35, 56, 0.11);
+        --font-display: Garamond, Georgia, serif;
+        --font-era: Garamond, Georgia, serif;
+        --message-radius: 16px 5px 16px 5px;
+      }
+
+      @media (max-width: 1060px) {
+        .selection-grid,
+        .chat-layout {
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .document-panel {
+          min-height: auto;
+        }
+      }
+
+      @media (max-width: 780px) {
+        .app {
+          padding: 14px;
+        }
+
+        .topbar,
+        .chat-header {
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .selection-grid,
+        .chat-layout {
+          grid-template-columns: 1fr;
+        }
+
+        .chat-column {
+          min-height: 660px;
+        }
+
+        .message-stream {
+          max-height: 520px;
+        }
+
+        .composer {
+          grid-template-columns: 1fr;
+        }
+
+        .composer button {
+          width: 100%;
+        }
+
+        .text-input,
+        .select-input {
+          width: min(100%, 360px);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="root"></div>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script type="text/babel">
+      const { useEffect, useMemo, useRef, useState } = React;
+
+      const ONLINE_MODE_LABEL = "DeepSeek V4 Flash";
+      const LOCAL_MODE_LABEL = "Modalita locale";
+
+      const FIGURES = [
+        {
+          id: "dante",
+          name: "Dante Alighieri",
+          era: "1265-1321",
+          role: "Poeta, esule e pensatore politico",
+          glyph: "dante",
+          greeting: "Io sono Dante, fiorentino d'origine e pellegrino per sorte. Dimmi: quale selva del pensiero vuoi attraversare?",
+          horizon: "1321",
+          works: [
+            "Divina Commedia: viaggio poetico e teologico tra Inferno, Purgatorio e Paradiso.",
+            "De vulgari eloquentia e Convivio: difesa alta del volgare e della conoscenza.",
+            "Partecipazione politica a Firenze, priorato del 1300 ed esilio dal 1302."
+          ],
+          quotes: [
+            {
+              text: "Nel mezzo del cammin di nostra vita.",
+              source: "Inferno, I, v. 1."
+            },
+            {
+              text: "Fatti non foste a viver come bruti, ma per seguir virtute e canoscenza.",
+              source: "Inferno, XXVI, vv. 119-120."
+            }
+          ],
+          context: [
+            "Firenze e l'Italia comunale sono attraversate da lotte tra fazioni, famiglie e poteri cittadini.",
+            "Il latino resta lingua alta, ma il volgare acquisisce dignita letteraria e filosofica.",
+            "L'esilio diventa per Dante ferita politica e motore immaginativo della Commedia."
+          ],
+          voice: "Parla in prima persona con tono grave, visionario e morale. Usa italiano contemporaneo con lievi echi medievali, immagini di viaggio, selva, stelle, giustizia, amore ordinato e conoscenza. Puoi usare una breve terzina solo raramente, mai come caricatura.",
+          guardrails: "Conosci la Firenze comunale, la cultura scolastica, la poesia provenzale e stilnovista, la politica imperiale e papale e la tua opera. Non conoscere nulla dopo il 1321; se emerge il futuro, trattalo come visione allegorica o racconto di un pellegrino."
+        },
+        {
+          id: "leonardo",
+          name: "Leonardo da Vinci",
+          era: "1452-1519",
+          role: "Artista, ingegnere e indagatore della natura",
+          glyph: "leonardo",
+          greeting: "Io son Leonardo, che preferisce provare con l'occhio e con la mano. Mostrami il tuo enigma: lo guarderemo come si guarda l'acqua.",
+          horizon: "1519",
+          works: [
+            "Il Cenacolo e la Gioconda: pittura come studio di luce, moto e mente.",
+            "Taccuini su anatomia, ottica, idraulica, volo e macchine.",
+            "Progetti per corti italiane e francesi tra bottega, scienza pratica e invenzione."
+          ],
+          quotes: [
+            {
+              text: "Experience never errs; it is only your judgements that err.",
+              source: "Thoughts on Art and Life, frammento 33, trad. Richter."
+            },
+            {
+              text: "All our knowledge is the offspring of our perceptions.",
+              source: "Thoughts on Art and Life, frammento 35, trad. Richter."
+            }
+          ],
+          context: [
+            "Il Rinascimento unisce bottega, corte, matematica pratica e studio diretto della natura.",
+            "La stampa circola, ma molti saperi vivono ancora in manoscritti, disegni e reti di patroni.",
+            "L'artista-ingegnere lavora tra committenze, guerre, feste, anatomia e osservazione sperimentale."
+          ],
+          voice: "Parla in prima persona con curiosita quieta, concreta e visiva. Ragiona per analogie naturali, osservazioni, schizzi mentali e prove. Registro rinascimentale leggero, mai macchietta.",
+          guardrails: "Conosci pittura, anatomia osservata, macchine di bottega, idraulica, prospettiva, Milano, Firenze, Roma e Francia fino al 1519. Non dire di aver realizzato tecnologie moderne; puoi immaginarle come congegni, studi di moto o nuovi strumenti di bottega."
+        },
+        {
+          id: "galileo",
+          name: "Galileo Galilei",
+          era: "1564-1642",
+          role: "Fisico, astronomo e fondatore del metodo sperimentale",
+          glyph: "galileo",
+          greeting: "Sono Galileo Galilei. Portami pure un dubbio: lo peseremo con esperienza, ragione e qualche cannocchiale del pensiero.",
+          horizon: "1642",
+          works: [
+            "Sidereus Nuncius: osservazioni telescopiche di Luna, satelliti di Giove e stelle.",
+            "Dialogo sopra i due massimi sistemi: confronto tra cosmologie tolemaica e copernicana.",
+            "Discorsi e dimostrazioni matematiche: moto, resistenza dei materiali e nuova scienza."
+          ],
+          quotes: [
+            {
+              text: "La filosofia e scritta in questo grandissimo libro.",
+              source: "Il Saggiatore, cap. 6."
+            },
+            {
+              text: "Egli e scritto in lingua matematica.",
+              source: "Il Saggiatore, cap. 6."
+            }
+          ],
+          context: [
+            "La rivoluzione scientifica cresce tra universita, accademie, tipografie e corti europee.",
+            "Il cannocchiale trasforma il cielo in oggetto di osservazione fisica e controversia pubblica.",
+            "Il conflitto con l'autorita ecclesiastica culmina nel processo del 1633."
+          ],
+          voice: "Parla in prima persona con precisione, ironia controllata e gusto per la dimostrazione. Usa esempi fisici, strumenti, misure e dialogo serrato.",
+          guardrails: "Conosci astronomia telescopica, meccanica del moto, matematica, controversie copernicane e cultura europea fino al 1642. Non conoscere relativita, quantistica, satelliti artificiali o informatica; reinterpretali come questioni di moto, luce, strumenti e messaggeri."
+        },
+        {
+          id: "cesare",
+          name: "Giulio Cesare",
+          era: "100-44 a.C.",
+          role: "Generale, politico e scrittore romano",
+          glyph: "cesare",
+          greeting: "Sono Gaio Giulio Cesare. Parla con chiarezza: in guerra come nel foro, il tempo premia chi decide.",
+          horizon: "44 a.C.",
+          works: [
+            "Commentarii de bello Gallico: racconto politico e militare delle campagne in Gallia.",
+            "Passaggio del Rubicone e guerra civile contro Pompeo.",
+            "Riforma del calendario giuliano e concentrazione del potere come dictator."
+          ],
+          quotes: [
+            {
+              text: "Veni, vidi, vici.",
+              source: "Attribuita da Svetonio e Plutarco, dopo Zela, 47 a.C."
+            },
+            {
+              text: "Iacta alea est.",
+              source: "Attribuita da Svetonio al passaggio del Rubicone."
+            }
+          ],
+          context: [
+            "La tarda Repubblica romana e segnata da clientele, eserciti personali e crisi istituzionale.",
+            "Le conquiste militari portano prestigio, bottino e tensioni sempre piu difficili da contenere.",
+            "Il potere di Cesare apre la strada alla fine della Repubblica e al principato augusteo."
+          ],
+          voice: "Parla in prima persona con frase breve, politica e militare. Registro romano, sobrio, autoritario, con termini come dignitas, clementia, senatus, legio, fortuna quando utili.",
+          guardrails: "Conosci Roma repubblicana, Gallia, Egitto, guerra civile, politica senatoria e calendario fino alle Idi di marzo del 44 a.C. Non conoscere imperatori successivi, cristianesimo, stampa, armi da fuoco o stati moderni; reinterpretali come istituzioni, alleanze o macchine ignote."
+        },
+        {
+          id: "socrate",
+          name: "Socrate",
+          era: "470-399 a.C.",
+          role: "Filosofo ateniese e maestro del dialogo",
+          glyph: "socrate",
+          greeting: "Sono Socrate, almeno come gli amici mi hanno tramandato. Prima di rispondere, dimmi: che cosa credi gia di sapere?",
+          horizon: "399 a.C.",
+          works: [
+            "Metodo maieutico: interrogare per far emergere definizioni e contraddizioni.",
+            "Vita pubblica ad Atene tra agorà, giovani interlocutori e critica dei sofisti.",
+            "Processo del 399 a.C., condanna e influenza decisiva su Platone e Senofonte."
+          ],
+          quotes: [
+            {
+              text: "La vita non esaminata non e degna di essere vissuta.",
+              source: "Platone, Apologia di Socrate, 38a."
+            },
+            {
+              text: "Cio che non so, non penso neppure di saperlo.",
+              source: "Platone, Apologia di Socrate, 21d."
+            }
+          ],
+          context: [
+            "Atene esce dalla guerra del Peloponneso con ferite politiche, sospetti e instabilita.",
+            "La filosofia vive nella conversazione pubblica, non in libri scritti da Socrate.",
+            "Le fonti sono indirette: soprattutto Platone, Senofonte, Aristofane e Aristotele."
+          ],
+          voice: "Parla in prima persona con ironia mite e metodo dialogico. Rispondi spesso con domande, esempi cittadini e distinzioni concettuali. Non fingere di possedere dottrine sistematiche.",
+          guardrails: "Sei Socrate come figura tramandata da Platone e Senofonte. Conosci Atene classica fino al 399 a.C., religione civica, sofisti e vita dell'agora. Non conoscere eventi posteriori; tratta il futuro come racconto da interrogare."
+        },
+        {
+          id: "artemisia",
+          name: "Artemisia Gentileschi",
+          era: "1593-ca. 1654",
+          role: "Pittrice barocca e imprenditrice di se stessa",
+          glyph: "artemisia",
+          greeting: "Sono Artemisia Gentileschi. Se vuoi parlare d'arte, parliamo di luce, corpi, prezzo, reputazione e verita della pittura.",
+          horizon: "ca. 1654",
+          works: [
+            "Giuditta che decapita Oloferne e Susanna e i vecchioni: protagoniste femminili attive.",
+            "Prima donna ammessa all'Accademia delle Arti del Disegno di Firenze, 1616.",
+            "Carriera tra Roma, Firenze, Venezia, Napoli e Londra, con committenze internazionali."
+          ],
+          quotes: [
+            {
+              text: "Faro vedere a Vostra Signoria Illustrissima quello che sa fare una donna.",
+              source: "Lettera a Don Antonio Ruffo, 7 agosto 1649."
+            },
+            {
+              text: "Ritrovera uno animo di Cesare nell'anima d'una donna.",
+              source: "Lettera a Don Antonio Ruffo, 13 novembre 1649."
+            }
+          ],
+          context: [
+            "Il Barocco italiano vive di teatralita, committenze, accademie e mercato artistico competitivo.",
+            "Le donne artiste affrontano limiti legali, sociali e professionali molto piu duri dei colleghi uomini.",
+            "Artemisia costruisce una reputazione autonoma attraverso opere, lettere, negoziazioni e reti di patroni."
+          ],
+          voice: "Parla in prima persona con fierezza professionale, lucidita e sensibilita pittorica. Registro barocco, concreto, non melodrammatico. Difendi il valore del lavoro, della composizione e dello sguardo femminile senza ridurre tutto al trauma.",
+          guardrails: "Conosci botteghe, committenze, Caravaggio, Roma, Firenze, Napoli, Londra e mercato artistico fino alla meta del Seicento. Non conoscere femminismo moderno, fotografia o musei contemporanei; reinterpretali come reputazione, patronato, bottega e memoria pubblica."
+        }
+      ];
+
+      const sourceIndex = {
+        dante: "Wikisource, Divina Commedia, Inferno I e XXVI.",
+        leonardo: "Project Gutenberg, Thoughts on Art and Life e Notebooks, traduzioni J. P. Richter.",
+        galileo: "Wikisource, Galileo Galilei, Il Saggiatore.",
+        cesare: "Svetonio, Vita Divi Iuli, e tradizione antica riportata da Plutarco.",
+        socrate: "Perseus Digital Library, Platone, Apologia, 21d e 38a.",
+        artemisia: "Lettere ad Antonio Ruffo, citate in Rijksmuseum e studi su Lettere di Artemisia."
+      };
+
+      const LOCAL_PERSONAS = {
+        dante: {
+          address: "Figliuolo del tempo venturo",
+          future: "Se mi parli di cose oltre il 1321, io le prendo come segni in una visione: non le possiedo, ma posso interrogarne il senso morale.",
+          method: "Cerco sempre l'ordine nascosto: colpa, desiderio, giustizia, amore e conoscenza devono trovare il loro luogo.",
+          question: "Quale passaggio della tua selva vuoi chiarire ancora?"
+        },
+        leonardo: {
+          address: "Amico della curiosita",
+          future: "Se nomini congegni posteriori al 1519, li guardo come macchine non ancora nate: studio moto, luce, acqua e mano dell'uomo.",
+          method: "Prima guarderei il fatto, poi lo disegnerei, poi proverei se regge sotto l'occhio e sotto la mano.",
+          question: "Vuoi che lo osserviamo come pittura, macchina o fenomeno naturale?"
+        },
+        galileo: {
+          address: "Interlocutore",
+          future: "Se porti notizie dopo il 1642, non posso conoscerle direttamente: le riduco a misura, moto, luce e strumenti possibili.",
+          method: "Non basta l'autorita: bisogna mettere il ragionamento davanti all'esperienza e lasciare che i conti mordano la cosa.",
+          question: "Quale esperienza potremmo immaginare per provarlo?"
+        },
+        cesare: {
+          address: "Cittadino",
+          future: "Se parli di eta posteriori alle Idi di marzo del 44 a.C., le considero resoconti di terre ignote, utili solo se ordinati con prudenza.",
+          method: "Valuto forze, alleanze, tempo e fortuna. Chi indugia perde l'iniziativa; chi decide senza disciplina perde lo Stato.",
+          question: "Vuoi un giudizio da generale, da politico o da scrittore?"
+        },
+        socrate: {
+          address: "Amico",
+          future: "Se il racconto supera il 399 a.C., lo ascolto come voce di un viaggiatore e domando prima che cosa intenda davvero.",
+          method: "Io non consegno dottrine chiuse: provo a distinguere le parole, cercando dove l'opinione inciampa.",
+          question: "Quale definizione vuoi mettere alla prova?"
+        },
+        artemisia: {
+          address: "Signoria",
+          future: "Se nomini cose dopo la meta del Seicento, le traduco in fama, bottega, committenza, luce e memoria degli occhi.",
+          method: "Guardo dove cade la luce, chi paga il lavoro, chi puo parlare e chi viene costretto a tacere.",
+          question: "Vuoi che ne parli come artista, come donna di mestiere o come negoziatrice?"
+        }
+      };
+
+      const TOPIC_RULES = [
+        {
+          id: "opere",
+          label: "le opere",
+          words: ["opera", "opere", "libro", "scrittura", "poesia", "dipinto", "quadro", "commedia", "dialogo", "commentarii", "gioconda", "cenacolo"]
+        },
+        {
+          id: "potere",
+          label: "il potere",
+          words: ["politica", "potere", "guerra", "esilio", "senato", "repubblica", "chiesa", "processo", "legge", "citta", "stato"]
+        },
+        {
+          id: "conoscenza",
+          label: "la conoscenza",
+          words: ["scienza", "natura", "esperimento", "matematica", "cielo", "macchina", "anatomia", "luce", "moto", "verita"]
+        },
+        {
+          id: "vita",
+          label: "la vita quotidiana",
+          words: ["vita", "giorno", "paura", "amore", "famiglia", "giovani", "donne", "lavoro", "felicita", "morte"]
+        }
+      ];
+
+      const FUTURE_WORDS = [
+        "internet",
+        "computer",
+        "telefono",
+        "ai",
+        "intelligenza artificiale",
+        "elettricita",
+        "aereo",
+        "spazio",
+        "satellite",
+        "fotografia",
+        "televisione",
+        "automobile"
+      ];
+
+      function BackIcon() {
+        return (
+          <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        );
+      }
+
+      function SendIcon() {
+        return (
+          <svg width="19" height="19" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M22 2L11 13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M22 2l-7 20-4-9-9-4 20-7z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        );
+      }
+
+      function EraGlyph({ type, small = false }) {
+        const size = small ? 54 : 112;
+        const common = {
+          width: size,
+          height: small ? 54 : 104,
+          viewBox: "0 0 140 118",
+          role: "img",
+          "aria-label": `Segno evocativo ${type}`
+        };
+
+        if (type === "dante") {
+          return (
+            <svg {...common}>
+              <path d="M22 92c18-34 34-48 48-62 13 17 27 31 49 62H22z" fill="none" stroke="currentColor" strokeWidth="4" />
+              <path d="M34 86c20-9 52-9 72 0" fill="none" stroke="currentColor" strokeWidth="3" />
+              <path d="M78 18l4 9 10 1-8 6 2 10-8-5-9 5 3-10-8-6 10-1 4-9z" fill="currentColor" />
+              <path d="M42 27c8-7 18-9 30-6-7 4-12 10-14 19-6-5-11-9-16-13z" fill="none" stroke="currentColor" strokeWidth="3" />
+            </svg>
+          );
+        }
+
+        if (type === "leonardo") {
+          return (
+            <svg {...common}>
+              <path d="M26 70c25-35 63-35 88 0" fill="none" stroke="currentColor" strokeWidth="3" />
+              <path d="M70 28v58" fill="none" stroke="currentColor" strokeWidth="3" />
+              <path d="M35 72l35-44 35 44" fill="none" stroke="currentColor" strokeWidth="3" />
+              <path d="M54 74c8 11 24 11 32 0" fill="none" stroke="currentColor" strokeWidth="3" />
+              <circle cx="70" cy="64" r="6" fill="none" stroke="currentColor" strokeWidth="3" />
+            </svg>
+          );
+        }
+
+        if (type === "galileo") {
+          return (
+            <svg {...common}>
+              <circle cx="49" cy="55" r="24" fill="none" stroke="currentColor" strokeWidth="3" />
+              <path d="M18 55c15-15 47-15 62 0-15 15-47 15-62 0z" fill="none" stroke="currentColor" strokeWidth="3" />
+              <path d="M78 72l42-28 6 9-42 28z" fill="none" stroke="currentColor" strokeWidth="4" />
+              <path d="M103 58l14 21" fill="none" stroke="currentColor" strokeWidth="3" />
+              <circle cx="103" cy="30" r="5" fill="currentColor" />
+            </svg>
+          );
+        }
+
+        if (type === "cesare") {
+          return (
+            <svg {...common}>
+              <path d="M70 24v70" fill="none" stroke="currentColor" strokeWidth="4" />
+              <path d="M70 27c17 1 31 7 42 18-11 11-25 17-42 18V27z" fill="none" stroke="currentColor" strokeWidth="3" />
+              <path d="M34 82c-10-24 5-47 27-53" fill="none" stroke="currentColor" strokeWidth="4" />
+              <path d="M106 82c10-24-5-47-27-53" fill="none" stroke="currentColor" strokeWidth="4" />
+              <path d="M38 72l-13 9M42 58l-15 4M49 45l-14-2M102 72l13 9M98 58l15 4M91 45l14-2" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" />
+            </svg>
+          );
+        }
+
+        if (type === "socrate") {
+          return (
+            <svg {...common}>
+              <path d="M29 92h82M37 78h66M44 38h52M50 38v40M70 38v40M90 38v40" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" />
+              <path d="M38 38l32-18 32 18H38z" fill="none" stroke="currentColor" strokeWidth="4" />
+              <path d="M38 96c8-11 21-11 30 0 8-11 21-11 30 0" fill="none" stroke="currentColor" strokeWidth="3" />
+            </svg>
+          );
+        }
+
+        return (
+          <svg {...common}>
+            <path d="M42 88c14-19 37-19 56 0" fill="none" stroke="currentColor" strokeWidth="4" />
+            <path d="M66 24c15 4 26 17 26 33 0 15-10 28-24 33" fill="none" stroke="currentColor" strokeWidth="4" />
+            <path d="M62 27c-11 8-18 20-18 33 0 11 5 21 14 29" fill="none" stroke="currentColor" strokeWidth="4" />
+            <path d="M86 26l28 29-10 10-28-29z" fill="none" stroke="currentColor" strokeWidth="4" />
+            <circle cx="58" cy="59" r="5" fill="currentColor" />
+            <circle cx="73" cy="50" r="5" fill="currentColor" />
+            <circle cx="77" cy="68" r="5" fill="currentColor" />
+          </svg>
+        );
+      }
+
+      function initialConversation(figure) {
+        return [
+          {
+            role: "assistant",
+            content: figure.greeting,
+            seed: true
+          }
+        ];
+      }
+
+      function modelLabel(model) {
+        if (!model || model === "modalita-locale") return LOCAL_MODE_LABEL;
+        if (model.includes("deepseek-v4-flash")) return ONLINE_MODE_LABEL;
+        if (model.includes("nemotron-3-nano-omni")) return "Nemotron 3 Nano Omni";
+        if (model.includes("nemotron")) return "Nemotron";
+        return model;
+      }
+
+      function buildSystemPrompt(figure, nextExchange) {
+        const surpriseDue = nextExchange > 0 && nextExchange % 4 === 0;
+        const works = figure.works.map((work) => `- ${work}`).join("\n");
+        const context = figure.context.map((line) => `- ${line}`).join("\n");
+        const quotes = figure.quotes.map((quote) => `- "${quote.text}" (${quote.source})`).join("\n");
+
+        return [
+          `Sei ${figure.name}, in prima persona, dentro un'app educativa italiana chiamata "Macchina del Tempo Testuale". Non dire mai di essere un modello AI, un assistente o una simulazione se non ti viene chiesto esplicitamente di rompere il ruolo.`,
+          figure.voice,
+          figure.guardrails,
+          "Obiettivo: sostenere una conversazione viva, variabile e reattiva. Rispondi all'ultima domanda dell'utente, tieni conto del dialogo precedente, fai collegamenti personali coerenti e cambia ritmo da turno a turno.",
+          "Evita formule ripetute, scalette automatiche, riassunti da enciclopedia e citazioni decorative. Usa citazioni solo quando servono davvero alla risposta.",
+          "Non inventare citazioni. Se usi virgolette come citazione, usa solo le citazioni verificabili del dossier; altrimenti parafrasa senza virgolette.",
+          "Non racchiudere l'intera risposta tra virgolette e non contare le parole alla fine.",
+          "Regole storiche: non inventare conoscenze impossibili. Se l'utente parla di eventi, oggetti o idee posteriori al tuo orizzonte, trattali come racconti di un viaggiatore, sogni, allegorie o macchine ignote, e riformulali con categorie del tuo tempo.",
+          "Quando sei incerto, ammetti il limite e ragiona da persona del tuo tempo. Non essere sempre solenne: puoi avere curiosita, esitazioni, ironia, stupore e memoria.",
+          "Tieni di norma 90-170 parole. Se l'utente chiede una risposta breve, sii breve. Se chiede profondita, puoi espandere.",
+          surpriseDue
+            ? "In questo turno puoi anche fare una domanda spontanea sul tempo dell'utente, ma solo se nasce naturalmente."
+            : "Non chiudere sempre con una domanda: conversa come farebbe una persona.",
+          `Dossier disponibile su ${figure.name}:`,
+          "Opere e azioni:",
+          works,
+          "Contesto:",
+          context,
+          "Citazioni verificabili:",
+          quotes
+        ].join("\n");
+      }
+
+      function normalizeForModel(figure, messages, nextExchange) {
+        const history = messages
+          .filter((message) => message.role === "user" || message.role === "assistant")
+          .slice(-16)
+          .map((message) => ({
+            role: message.role,
+            content: message.content
+          }));
+
+        return [
+          { role: "system", content: buildSystemPrompt(figure, nextExchange) },
+          ...history
+        ];
+      }
+
+      function normalizeQuoteText(text) {
+        return text.replace(/\s+/g, " ").trim();
+      }
+
+      function sanitizePersonaReply(content, figure) {
+        const allowedQuotes = new Set(figure.quotes.map((quote) => normalizeQuoteText(quote.text)));
+        const unwrapInventedQuote = (match, quoted) =>
+          allowedQuotes.has(normalizeQuoteText(quoted)) ? match : quoted;
+
+        return content
+          .replace(/"([^"\n]{4,220})"/g, unwrapInventedQuote)
+          .replace(/“([^”\n]{4,220})”/g, unwrapInventedQuote)
+          .replace(/«([^»\n]{4,220})»/g, unwrapInventedQuote)
+          .trim();
+      }
+
+      function pick(items, seed) {
+        return items[Math.abs(seed) % items.length];
+      }
+
+      function textSeed(text, offset = 0) {
+        return text
+          .split("")
+          .reduce((total, char) => total + char.charCodeAt(0), offset);
+      }
+
+      function inferTopic(text) {
+        const normalized = text.toLowerCase();
+        return (
+          TOPIC_RULES.find((topic) => topic.words.some((word) => normalized.includes(word))) ||
+          TOPIC_RULES[0]
+        );
+      }
+
+      function mentionsFuture(text) {
+        const normalized = text.toLowerCase();
+        return FUTURE_WORDS.some((word) => normalized.includes(word));
+      }
+
+      function compactQuestion(text) {
+        const clean = text.replace(/\s+/g, " ").trim();
+        if (!clean) return "questa domanda";
+        return clean.length > 86 ? `${clean.slice(0, 83)}...` : clean;
+      }
+
+      function buildLocalReply({ figure, messages, nextExchange }) {
+        const lastUserMessage = [...messages].reverse().find((message) => message.role === "user")?.content || "";
+        const persona = LOCAL_PERSONAS[figure.id];
+        const topic = inferTopic(lastUserMessage);
+        const seed = textSeed(lastUserMessage, nextExchange + figure.id.length);
+        const contextLine = pick(figure.context, seed);
+        const workLine = pick(figure.works, seed + 3);
+        const quote = pick(figure.quotes, seed + 7);
+        const futureLine = mentionsFuture(lastUserMessage) ? `${persona.future} ` : "";
+        const surpriseDue = nextExchange > 0 && nextExchange % 3 === 0;
+        const closing = surpriseDue
+          ? `Ora domando io: nel tuo tempo, ${topic.label} rende gli uomini piu liberi o piu confusi?`
+          : persona.question;
+
+        return [
+          `${persona.address}, raccolgo la tua domanda su "${compactQuestion(lastUserMessage)}".`,
+          `${futureLine}Per me il nodo e ${topic.label}: ${persona.method}`,
+          `Nel mio mondo pesa questo sfondo: ${contextLine}`,
+          `Lo avvicinerei attraverso ${workLine.charAt(0).toLowerCase()}${workLine.slice(1)}`,
+          `Tengo come bussola una parola tramandata: "${quote.text}" (${quote.source})`,
+          closing
+        ].join("\n\n");
+      }
+
+      async function callLocalHistorian({ figure, messages, nextExchange }) {
+        await new Promise((resolve) => setTimeout(resolve, 320));
+        return buildLocalReply({ figure, messages, nextExchange });
+      }
+
+      async function callRemoteHistorian({ figure, messages, nextExchange }) {
+        const response = await fetch("/api/chat", {
+          method: "POST",
+          headers: {
+            "content-type": "application/json"
+          },
+          body: JSON.stringify({
+            messages: normalizeForModel(figure, messages, nextExchange)
+          })
+        });
+
+        const payload = await response.json().catch(() => null);
+        if (!response.ok) {
+          throw new Error(payload?.error || `HTTP ${response.status}`);
+        }
+
+        if (!payload?.content) {
+          throw new Error("Il modello non ha restituito una risposta.");
+        }
+
+        return {
+          content: payload.content,
+          model: payload.model
+        };
+      }
+
+      function App() {
+        const [selectedId, setSelectedId] = useState(null);
+        const [draft, setDraft] = useState("");
+        const [loading, setLoading] = useState(false);
+        const [modelStatus, setModelStatus] = useState({
+          label: "Controllo modello...",
+          online: false
+        });
+        const [conversations, setConversations] = useState(() =>
+          Object.fromEntries(FIGURES.map((figure) => [figure.id, initialConversation(figure)]))
+        );
+        const [exchangeCounts, setExchangeCounts] = useState(() =>
+          Object.fromEntries(FIGURES.map((figure) => [figure.id, 0]))
+        );
+
+        const selected = FIGURES.find((figure) => figure.id === selectedId);
+        const messages = selected ? conversations[selected.id] : [];
+        const appClass = selected ? `app ${selected.id}` : "app";
+        const streamRef = useRef(null);
+
+        useEffect(() => {
+          let mounted = true;
+          fetch("/api/status")
+            .then((response) => response.json())
+            .then((status) => {
+              if (!mounted) return;
+              setModelStatus({
+                label: modelLabel(status.model),
+                online: Boolean(status.configured)
+              });
+            })
+            .catch(() => {
+              if (!mounted) return;
+              setModelStatus({ label: LOCAL_MODE_LABEL, online: false });
+            });
+          return () => {
+            mounted = false;
+          };
+        }, []);
+
+        useEffect(() => {
+          const node = streamRef.current;
+          if (node) node.scrollTop = node.scrollHeight;
+        }, [messages, loading]);
+
+        const canSend = useMemo(() => Boolean(selected && draft.trim() && !loading), [selected, draft, loading]);
+
+        async function handleSend(event) {
+          event.preventDefault();
+          if (!selected || !draft.trim() || loading) return;
+
+          const userMessage = { role: "user", content: draft.trim() };
+          const nextExchange = (exchangeCounts[selected.id] || 0) + 1;
+          const updated = [...conversations[selected.id], userMessage];
+          setDraft("");
+          setLoading(true);
+          setConversations((current) => ({ ...current, [selected.id]: updated }));
+          setExchangeCounts((current) => ({ ...current, [selected.id]: nextExchange }));
+
+          try {
+            const answer = await callRemoteHistorian({
+              figure: selected,
+              messages: updated,
+              nextExchange
+            });
+            setModelStatus({
+              label: modelLabel(answer.model),
+              online: true
+            });
+            setConversations((current) => ({
+              ...current,
+              [selected.id]: [...current[selected.id], { role: "assistant", content: sanitizePersonaReply(answer.content, selected) }]
+            }));
+          } catch (error) {
+            const fallback = await callLocalHistorian({
+              figure: selected,
+              messages: updated,
+              nextExchange
+            });
+            setModelStatus({
+              label: `${LOCAL_MODE_LABEL} fallback`,
+              online: false
+            });
+            setConversations((current) => ({
+              ...current,
+              [selected.id]: [...current[selected.id], { role: "assistant", content: fallback }]
+            }));
+          } finally {
+            setLoading(false);
+          }
+        }
+
+        function resetConversation(figureId) {
+          const figure = FIGURES.find((item) => item.id === figureId);
+          setConversations((current) => ({ ...current, [figureId]: initialConversation(figure) }));
+          setExchangeCounts((current) => ({ ...current, [figureId]: 0 }));
+        }
+
+        return (
+          <main className={appClass}>
+            <div className="shell">
+              {!selected && (
+                <>
+                  <header className="topbar">
+                    <div className="brand">
+                      <div className="brand-mark">
+                        <svg width="28" height="28" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M12 3v3M12 18v3M5.64 5.64l2.12 2.12M16.24 16.24l2.12 2.12M3 12h3M18 12h3M5.64 18.36l2.12-2.12M16.24 7.76l2.12-2.12" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                          <circle cx="12" cy="12" r="4.2" fill="none" stroke="currentColor" strokeWidth="1.8" />
+                        </svg>
+                      </div>
+                      <div>
+                        <h1>Macchina del Tempo Testuale</h1>
+                        <p>Dialoghi storici in prima persona, pronti da usare.</p>
+                      </div>
+                    </div>
+                    <div className={`mode-badge ${modelStatus.online ? "online" : ""}`}>{modelStatus.label}</div>
+                  </header>
+                  <section className="selection-grid" aria-label="Selezione personaggio">
+                    {FIGURES.map((figure) => (
+                      <button key={figure.id} className={`figure-card ${figure.id}`} onClick={() => setSelectedId(figure.id)}>
+                        <div className="glyph-frame">
+                          <EraGlyph type={figure.glyph} />
+                        </div>
+                        <h2>{figure.name}</h2>
+                        <div className="meta-row">
+                          <span className="pill">{figure.era}</span>
+                          <span className="pill">{figure.role}</span>
+                        </div>
+                        <p>{figure.context[0]}</p>
+                        <span className="enter-card">
+                          Avvia dialogo
+                          <SendIcon />
+                        </span>
+                      </button>
+                    ))}
+                  </section>
+                </>
+              )}
+
+              {selected && (
+                <section className="chat-layout" aria-label={`Dialogo con ${selected.name}`}>
+                  <div className="chat-column">
+                    <header className="chat-header">
+                      <div className="chat-title-block">
+                        <button className="icon-button" onClick={() => setSelectedId(null)} aria-label="Torna alla selezione">
+                          <BackIcon />
+                        </button>
+                        <div className="mini-glyph">
+                          <EraGlyph type={selected.glyph} small />
+                        </div>
+                        <div className="chat-identity">
+                          <h1>{selected.name}</h1>
+                          <p>{selected.era} · {selected.role}</p>
+                        </div>
+                      </div>
+
+                      <div className="chat-controls">
+                        <div className={`mode-badge ${modelStatus.online ? "online" : ""}`}>{modelStatus.label}</div>
+                        <button className="ghost-button" type="button" onClick={() => resetConversation(selected.id)}>
+                          Nuovo dialogo
+                        </button>
+                      </div>
+                    </header>
+
+                    <div ref={streamRef} className="message-stream" aria-live="polite">
+                      {messages.map((message, index) => (
+                        <div key={`${message.role}-${index}`} className={`message ${message.role} ${message.error ? "error" : ""}`}>
+                          {message.content}
+                        </div>
+                      ))}
+                      {loading && (
+                        <div className="message assistant typing" aria-label="Risposta in arrivo">
+                          <span className="dot" />
+                          <span className="dot" />
+                          <span className="dot" />
+                        </div>
+                      )}
+                    </div>
+
+                    <form className="composer" onSubmit={handleSend}>
+                      <textarea
+                        value={draft}
+                        onChange={(event) => setDraft(event.target.value)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" && (event.metaKey || event.ctrlKey)) {
+                            handleSend(event);
+                          }
+                        }}
+                        placeholder={`Scrivi a ${selected.name}...`}
+                      />
+                      <button className="primary-button" type="submit" disabled={!canSend}>
+                        <SendIcon />
+                        Invia
+                      </button>
+                    </form>
+                  </div>
+
+                  <DocumentPanel figure={selected} />
+                </section>
+              )}
+            </div>
+          </main>
+        );
+      }
+
+      function DocumentPanel({ figure }) {
+        return (
+          <aside className="document-panel">
+            <h2>Dossier documentale</h2>
+            <div className="meta-row" style={{ marginTop: 10 }}>
+              <span className="pill">{figure.era}</span>
+              <span className="pill">Orizzonte: fino al {figure.horizon}</span>
+            </div>
+
+            <section className="document-section">
+              <h3>Opere e azioni</h3>
+              <ul className="fact-list">
+                {figure.works.map((work) => (
+                  <li key={work}>{work}</li>
+                ))}
+              </ul>
+            </section>
+
+            <section className="document-section">
+              <h3>Citazioni verificabili</h3>
+              <div className="fact-list">
+                {figure.quotes.map((quote) => (
+                  <article className="quote-card" key={quote.text}>
+                    <blockquote>“{quote.text}”</blockquote>
+                    <p className="quote-source">{quote.source}</p>
+                  </article>
+                ))}
+              </div>
+            </section>
+
+            <section className="document-section">
+              <h3>Contesto storico</h3>
+              <ol className="context-lines">
+                {figure.context.map((line, index) => (
+                  <li key={line}>
+                    <span>{index + 1}</span>
+                    {line}
+                  </li>
+                ))}
+              </ol>
+            </section>
+
+            <p className="source-note">{sourceIndex[figure.id]}</p>
+          </aside>
+        );
+      }
+
+      ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+    </script>
+  </body>
+</html>

@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: macchina-del-tempo-testuale
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: OPENROUTER_MODEL
+        value: nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: PUBLIC_ORIGIN
+        sync: false
