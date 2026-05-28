@@ -1049,6 +1049,11 @@
         return model;
       }
 
+      function compactErrorMessage(message) {
+        const clean = String(message || "errore OpenRouter").replace(/\s+/g, " ").trim();
+        return clean.length > 46 ? `${clean.slice(0, 43)}...` : clean;
+      }
+
       function buildSystemPrompt(figure, nextExchange) {
         const surpriseDue = nextExchange > 0 && nextExchange % 4 === 0;
         const works = figure.works.map((work) => `- ${work}`).join("\n");
@@ -1200,7 +1205,8 @@
         const [loading, setLoading] = useState(false);
         const [modelStatus, setModelStatus] = useState({
           label: "Controllo modello...",
-          online: false
+          online: false,
+          detail: ""
         });
         const [conversations, setConversations] = useState(() =>
           Object.fromEntries(FIGURES.map((figure) => [figure.id, initialConversation(figure)]))
@@ -1222,12 +1228,13 @@
               if (!mounted) return;
               setModelStatus({
                 label: modelLabel(status.model),
-                online: Boolean(status.configured)
+                online: Boolean(status.configured),
+                detail: status.configured ? "OpenRouter configurato" : "OpenRouter non configurato"
               });
             })
             .catch(() => {
               if (!mounted) return;
-              setModelStatus({ label: LOCAL_MODE_LABEL, online: false });
+              setModelStatus({ label: LOCAL_MODE_LABEL, online: false, detail: "Impossibile leggere /api/status" });
             });
           return () => {
             mounted = false;
@@ -1261,7 +1268,8 @@
             });
             setModelStatus({
               label: modelLabel(answer.model),
-              online: true
+              online: true,
+              detail: "Risposta OpenRouter ricevuta"
             });
             setConversations((current) => ({
               ...current,
@@ -1274,8 +1282,9 @@
               nextExchange
             });
             setModelStatus({
-              label: `${LOCAL_MODE_LABEL} fallback`,
-              online: false
+              label: `Fallback: ${compactErrorMessage(error.message)}`,
+              online: false,
+              detail: error.message || "Errore OpenRouter"
             });
             setConversations((current) => ({
               ...current,
@@ -1310,7 +1319,7 @@
                         <p>Dialoghi storici in prima persona, pronti da usare.</p>
                       </div>
                     </div>
-                    <div className={`mode-badge ${modelStatus.online ? "online" : ""}`}>{modelStatus.label}</div>
+                    <div className={`mode-badge ${modelStatus.online ? "online" : ""}`} title={modelStatus.detail || modelStatus.label}>{modelStatus.label}</div>
                   </header>
                   <section className="selection-grid" aria-label="Selezione personaggio">
                     {FIGURES.map((figure) => (
@@ -1352,7 +1361,7 @@
                       </div>
 
                       <div className="chat-controls">
-                        <div className={`mode-badge ${modelStatus.online ? "online" : ""}`}>{modelStatus.label}</div>
+                        <div className={`mode-badge ${modelStatus.online ? "online" : ""}`} title={modelStatus.detail || modelStatus.label}>{modelStatus.label}</div>
                         <button className="ghost-button" type="button" onClick={() => resetConversation(selected.id)}>
                           Nuovo dialogo
                         </button>
