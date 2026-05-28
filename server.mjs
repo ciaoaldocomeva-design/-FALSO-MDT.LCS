@@ -39,6 +39,7 @@ async function readJsonFile(path) {
     throw error;
   }
 }
+
 function cleanConfigValue(value) {
   return typeof value === "string" ? value.trim() : "";
 }
