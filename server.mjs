@@ -39,19 +39,27 @@ async function readJsonFile(path) {
     throw error;
   }
 }
+function cleanConfigValue(value) {
+  return typeof value === "string" ? value.trim() : "";
+}
+
+function hasUsableApiKey(value) {
+  const apiKey = cleanConfigValue(value);
+  return Boolean(apiKey && !apiKey.includes("..."));
+}
 
 async function getOpenRouterConfig() {
   const fileConfig = await readJsonFile(openRouterConfigPath);
   const fileModels = Array.isArray(fileConfig.models) ? fileConfig.models : [];
   const routes = fileModels.map((item) => ({
-    model: item.model,
-    apiKey: item.apiKey
+    model: cleanConfigValue(item.model),
+    apiKey: cleanConfigValue(item.apiKey)
   }));
 
   if (!routes.length) {
     routes.push({
-      model: process.env.OPENROUTER_MODEL || fileConfig.model || DEFAULT_OPENROUTER_MODEL,
-      apiKey: process.env.OPENROUTER_API_KEY || fileConfig.apiKey || ""
+      model: cleanConfigValue(process.env.OPENROUTER_MODEL) || cleanConfigValue(fileConfig.model) || DEFAULT_OPENROUTER_MODEL,
+      apiKey: cleanConfigValue(process.env.OPENROUTER_API_KEY) || cleanConfigValue(fileConfig.apiKey)
     });
   }
 
@@ -59,9 +67,9 @@ async function getOpenRouterConfig() {
     routes: routes
       .map((route) => ({
         model: route.model || DEFAULT_OPENROUTER_MODEL,
-        apiKey: route.apiKey || ""
+        apiKey: cleanConfigValue(route.apiKey)
       }))
-      .filter((route) => route.apiKey),
+      .filter((route) => hasUsableApiKey(route.apiKey)),
     model: routes[0]?.model || DEFAULT_OPENROUTER_MODEL
   };
 }
@@ -135,8 +143,8 @@ async function handleChat(request, response) {
       headers: {
         "authorization": `Bearer ${route.apiKey}`,
         "content-type": "application/json",
-        "http-referer": publicOrigin,
-        "x-openrouter-title": "Macchina del Tempo Testuale"
+        "HTTP-Referer": publicOrigin,
+        "X-Title": "Macchina del Tempo Testuale"
       },
       body: JSON.stringify({
         model: route.model,
@@ -146,10 +154,9 @@ async function handleChat(request, response) {
         presence_penalty: 0.35,
         frequency_penalty: 0.18,
         reasoning: {
-          effort: "none",
+          enabled: true,
           exclude: true
         },
-        include_reasoning: false,
         max_tokens: 900,
         stream: false
       })
