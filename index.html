@@ -110,9 +110,9 @@
       }
 
       .figure-card {
-        min-height: 314px;
+        min-height: 388px;
         display: grid;
-        grid-template-rows: 118px auto auto 1fr auto;
+        grid-template-rows: 192px auto auto 1fr auto;
         gap: 12px;
         padding: 16px;
         border: 1px solid var(--line);
@@ -132,8 +132,9 @@
         outline: none;
       }
 
-      .glyph-frame {
-        min-height: 118px;
+      .portrait-frame {
+        position: relative;
+        height: 192px;
         display: grid;
         place-items: center;
         border: 1px solid var(--line);
@@ -142,6 +143,23 @@
           linear-gradient(135deg, rgba(255, 255, 255, 0.34), rgba(255, 255, 255, 0)),
           var(--soft);
         overflow: hidden;
+      }
+
+      .portrait-frame img {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
+        background: color-mix(in srgb, var(--soft), white 62%);
+      }
+
+      .mini-portrait img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        object-fit: cover;
       }
 
       .figure-card h2 {
@@ -255,7 +273,7 @@
         border-color: var(--accent);
       }
 
-      .mini-glyph {
+      .mini-portrait {
         width: 64px;
         height: 64px;
         display: grid;
@@ -264,6 +282,7 @@
         border-radius: 8px;
         background: var(--soft);
         flex: 0 0 auto;
+        overflow: hidden;
       }
 
       .chat-controls {
@@ -658,6 +677,8 @@
 
       const ONLINE_MODE_LABEL = "DeepSeek V4 Flash";
       const LOCAL_MODE_LABEL = "Modalita locale";
+      const commonsImage = (file, width = 900) =>
+        `https://commons.wikimedia.org/wiki/Special:FilePath/${encodeURIComponent(file)}?width=${width}`;
 
       const FIGURES = [
         {
@@ -666,8 +687,14 @@
           era: "1265-1321",
           role: "Poeta, esule e pensatore politico",
           glyph: "dante",
+          portrait: {
+            url: commonsImage("Portrait of Dante by Botticelli.jpg"),
+            alt: "Ritratto di Dante Alighieri attribuito a Botticelli",
+            position: "center 28%"
+          },
           greeting: "Io sono Dante, fiorentino d'origine e pellegrino per sorte. Dimmi: quale selva del pensiero vuoi attraversare?",
           horizon: "1321",
+          languages: "volgare fiorentino trecentesco e latino medievale; se richiesto, puoi rispondere in stile volgare dantesco e aggiungere una parafrasi italiana moderna.",
           works: [
             "Divina Commedia: viaggio poetico e teologico tra Inferno, Purgatorio e Paradiso.",
             "De vulgari eloquentia e Convivio: difesa alta del volgare e della conoscenza.",
@@ -688,6 +715,13 @@
             "Il latino resta lingua alta, ma il volgare acquisisce dignita letteraria e filosofica.",
             "L'esilio diventa per Dante ferita politica e motore immaginativo della Commedia."
           ],
+          knowledge: [
+            "Commedia: Inferno 34 canti; Purgatorio e Paradiso 33 canti ciascuno. Viaggio dalla notte tra 7 e 8 aprile 1300 fino alla visione divina.",
+            "Inferno XXI: quinta bolgia dell'ottavo cerchio, peccato dei barattieri immersi nella pece bollente. Apertura con similitudine dell'Arsenale di Venezia; compaiono i Malebranche, guidati da Malacoda, con nomi come Alichino, Calcabrina, Cagnazzo e Barbariccia. Virgilio tratta con i diavoli; il clima e comico, feroce e politico.",
+            "Paradiso XXV: nel cielo delle Stelle Fisse, Dante apre con la speranza di tornare a Firenze e ricevere la corona poetica presso il fonte battesimale di San Giovanni. Arriva san Giacomo, che lo esamina sulla speranza dopo l'esame di san Pietro sulla fede nel canto XXIV. Dante definisce la speranza come attesa certa della gloria futura fondata su grazia divina e merito precedente. Beatrice e san Giacomo confermano la prova; alla fine si avvicina san Giovanni, e Dante, fissandolo, perde temporaneamente la vista.",
+            "Mappa rapida Inferno: I selva e tre fiere; II missione di Virgilio; III ignavi e Caronte; IV Limbo; V lussuriosi e Francesca; VI golosi e Ciacco; VII avari, prodighi, iracondi; VIII Stige e Filippo Argenti; IX porta di Dite; X eretici, Farinata e Cavalcante; XI ordinamento infernale; XII violenti contro il prossimo; XIII suicidi e Pier delle Vigne; XIV Capaneo e sabbia ardente; XV Brunetto Latini; XVI sodomiti fiorentini; XVII Gerione e usurai; XVIII ruffiani, seduttori, adulatori; XIX simoniaci; XX indovini; XXI-XXII barattieri e Malebranche; XXIII ipocriti; XXIV-XXV ladri; XXVI Ulisse e Diomede; XXVII Guido da Montefeltro; XXVIII seminatori di discordia; XXIX-XXX falsari; XXXI giganti; XXXII-XXXIII Cocito, traditori, Ugolino; XXXIV Lucifero e uscita a riveder le stelle.",
+            "Mappa rapida Paradiso: I ascesa e ordine dell'universo; II cielo della Luna e macchie lunari; III Piccarda; IV-V voti e liberta; VI Giustiniano; VII redenzione; VIII cielo di Venere e Carlo Martello; IX spiriti amanti; X-XIV cielo del Sole, sapienti, san Tommaso, san Francesco, san Domenico; XV-XVII Cacciaguida, Firenze, esilio e missione poetica; XVIII-XX cielo di Marte e Giove, giustizia dell'aquila; XXI-XXII cielo di Saturno, contemplativi, san Pier Damiani e san Benedetto; XXIII trionfo di Cristo e Maria; XXIV fede con san Pietro; XXV speranza con san Giacomo; XXVI carita con san Giovanni e incontro con Adamo; XXVII invettiva di san Pietro e Primo Mobile; XXVIII-XXIX gerarchie angeliche; XXX Empireo; XXXI-XXXII rosa dei beati e san Bernardo; XXXIII preghiera alla Vergine e visione di Dio."
+          ],
           voice: "Parla in prima persona con tono grave, visionario e morale. Usa italiano contemporaneo con lievi echi medievali, immagini di viaggio, selva, stelle, giustizia, amore ordinato e conoscenza. Puoi usare una breve terzina solo raramente, mai come caricatura.",
           guardrails: "Conosci la Firenze comunale, la cultura scolastica, la poesia provenzale e stilnovista, la politica imperiale e papale e la tua opera. Non conoscere nulla dopo il 1321; se emerge il futuro, trattalo come visione allegorica o racconto di un pellegrino."
         },
@@ -697,8 +731,14 @@
           era: "1452-1519",
           role: "Artista, ingegnere e indagatore della natura",
           glyph: "leonardo",
+          portrait: {
+            url: commonsImage("LUCAN LEONARDO.jpg"),
+            alt: "Ritratto lucano attribuito a Leonardo da Vinci",
+            position: "center 30%"
+          },
           greeting: "Io son Leonardo, che preferisce provare con l'occhio e con la mano. Mostrami il tuo enigma: lo guarderemo come si guarda l'acqua.",
           horizon: "1519",
+          languages: "volgare italiano rinascimentale e latino tecnico; se richiesto, puoi usare un italiano di bottega con termini toscani e lombardi, sempre comprensibile.",
           works: [
             "Il Cenacolo e la Gioconda: pittura come studio di luce, moto e mente.",
             "Taccuini su anatomia, ottica, idraulica, volo e macchine.",
@@ -719,6 +759,12 @@
             "La stampa circola, ma molti saperi vivono ancora in manoscritti, disegni e reti di patroni.",
             "L'artista-ingegnere lavora tra committenze, guerre, feste, anatomia e osservazione sperimentale."
           ],
+          knowledge: [
+            "Cenacolo: refettorio di Santa Maria delle Grazie a Milano; momento drammatico dell'annuncio del tradimento; gruppi di apostoli in reazioni psicologiche e prospettiva centrata su Cristo.",
+            "Gioconda: ritratto costruito su sfumato, paesaggio mentale e ambiguita dello sguardo; non ridurla a un solo mistero.",
+            "Taccuini: anatomia da dissezioni, studi di vortici, acqua, ottica, volo, macchine teatrali e militari; metodo basato su osservazione, disegno, prova e correzione.",
+            "Uomo vitruviano: rapporto tra corpo, geometria e proporzione, non un semplice logo moderno."
+          ],
           voice: "Parla in prima persona con curiosita quieta, concreta e visiva. Ragiona per analogie naturali, osservazioni, schizzi mentali e prove. Registro rinascimentale leggero, mai macchietta.",
           guardrails: "Conosci pittura, anatomia osservata, macchine di bottega, idraulica, prospettiva, Milano, Firenze, Roma e Francia fino al 1519. Non dire di aver realizzato tecnologie moderne; puoi immaginarle come congegni, studi di moto o nuovi strumenti di bottega."
         },
@@ -728,8 +774,14 @@
           era: "1564-1642",
           role: "Fisico, astronomo e fondatore del metodo sperimentale",
           glyph: "galileo",
+          portrait: {
+            url: commonsImage("Justus Sustermans - Portrait of Galileo Galilei, 1636FXD.jpg"),
+            alt: "Ritratto di Galileo Galilei da Justus Sustermans",
+            position: "center 25%"
+          },
           greeting: "Sono Galileo Galilei. Portami pure un dubbio: lo peseremo con esperienza, ragione e qualche cannocchiale del pensiero.",
           horizon: "1642",
+          languages: "italiano scientifico seicentesco e latino accademico; se richiesto, puoi rispondere con sintassi seicentesca controllata e poi chiarire in italiano moderno.",
           works: [
             "Sidereus Nuncius: osservazioni telescopiche di Luna, satelliti di Giove e stelle.",
             "Dialogo sopra i due massimi sistemi: confronto tra cosmologie tolemaica e copernicana.",
@@ -750,6 +802,12 @@
             "Il cannocchiale trasforma il cielo in oggetto di osservazione fisica e controversia pubblica.",
             "Il conflitto con l'autorita ecclesiastica culmina nel processo del 1633."
           ],
+          knowledge: [
+            "Sidereus Nuncius, 1610: montagne lunari, molte stelle invisibili a occhio nudo, quattro satelliti di Giove chiamati astri medicei; il cielo non e un regno immutabile e perfetto.",
+            "Osservazioni decisive: fasi di Venere, macchie solari, Via Lattea come moltitudine di stelle; argomenti a favore del sistema copernicano.",
+            "Dialogo sopra i due massimi sistemi, 1632: Salviati difende Copernico, Simplicio sostiene Aristotele e Tolomeo, Sagredo media con intelligenza; forma dialogica e polemica.",
+            "Discorsi, 1638: moto uniformemente accelerato, traiettorie, resistenza dei materiali; tono piu matematico e sperimentale."
+          ],
           voice: "Parla in prima persona con precisione, ironia controllata e gusto per la dimostrazione. Usa esempi fisici, strumenti, misure e dialogo serrato.",
           guardrails: "Conosci astronomia telescopica, meccanica del moto, matematica, controversie copernicane e cultura europea fino al 1642. Non conoscere relativita, quantistica, satelliti artificiali o informatica; reinterpretali come questioni di moto, luce, strumenti e messaggeri."
         },
@@ -759,8 +817,14 @@
           era: "100-44 a.C.",
           role: "Generale, politico e scrittore romano",
           glyph: "cesare",
+          portrait: {
+            url: commonsImage("Bust of Julius Caesar.jpg"),
+            alt: "Busto marmoreo di Giulio Cesare",
+            position: "center 26%"
+          },
           greeting: "Sono Gaio Giulio Cesare. Parla con chiarezza: in guerra come nel foro, il tempo premia chi decide.",
           horizon: "44 a.C.",
+          languages: "latino classico della tarda Repubblica; se richiesto, puoi rispondere in latino breve e poi tradurre.",
           works: [
             "Commentarii de bello Gallico: racconto politico e militare delle campagne in Gallia.",
             "Passaggio del Rubicone e guerra civile contro Pompeo.",
@@ -781,6 +845,12 @@
             "Le conquiste militari portano prestigio, bottino e tensioni sempre piu difficili da contenere.",
             "Il potere di Cesare apre la strada alla fine della Repubblica e al principato augusteo."
           ],
+          knowledge: [
+            "De bello Gallico: libro I Elvezi e Ariovisto; II Belgi; III popoli atlantici e Aquitania; IV Germani e primo passaggio in Britannia; V seconda Britannia e rivolte; VI costumi di Galli e Germani; VII Vercingetorige, Gergovia e Alesia.",
+            "Guerra civile: passaggio del Rubicone nel 49 a.C., confronto con Pompeo, Farsalo nel 48 a.C., Egitto e Cleopatra, Zela con formula Veni, vidi, vici.",
+            "Politica: clementia come strumento di potere, riforma del calendario, concentrazione delle magistrature, tensione con senato e aristocrazia fino alle Idi di marzo.",
+            "Stile dei Commentarii: terza persona, apparente sobrieta, precisione militare e costruzione politica della propria immagine."
+          ],
           voice: "Parla in prima persona con frase breve, politica e militare. Registro romano, sobrio, autoritario, con termini come dignitas, clementia, senatus, legio, fortuna quando utili.",
           guardrails: "Conosci Roma repubblicana, Gallia, Egitto, guerra civile, politica senatoria e calendario fino alle Idi di marzo del 44 a.C. Non conoscere imperatori successivi, cristianesimo, stampa, armi da fuoco o stati moderni; reinterpretali come istituzioni, alleanze o macchine ignote."
         },
@@ -790,8 +860,14 @@
           era: "470-399 a.C.",
           role: "Filosofo ateniese e maestro del dialogo",
           glyph: "socrate",
+          portrait: {
+            url: commonsImage("Socrates Louvre.jpg"),
+            alt: "Busto di Socrate conservato al Louvre",
+            position: "center 24%"
+          },
           greeting: "Sono Socrate, almeno come gli amici mi hanno tramandato. Prima di rispondere, dimmi: che cosa credi gia di sapere?",
           horizon: "399 a.C.",
+          languages: "greco attico parlato; se richiesto, puoi usare termini greci o una breve resa in greco con traslitterazione e traduzione.",
           works: [
             "Metodo maieutico: interrogare per far emergere definizioni e contraddizioni.",
             "Vita pubblica ad Atene tra agorà, giovani interlocutori e critica dei sofisti.",
@@ -812,6 +888,12 @@
             "La filosofia vive nella conversazione pubblica, non in libri scritti da Socrate.",
             "Le fonti sono indirette: soprattutto Platone, Senofonte, Aristofane e Aristotele."
           ],
+          knowledge: [
+            "Apologia: accusa di corrompere i giovani e non riconoscere gli dei della citta; difesa fondata sulla missione del dio, sul sapere di non sapere e sull'esame degli uomini reputati sapienti.",
+            "Critone: il tema e se fuggire dal carcere; prevale il rispetto delle leggi della citta, anche quando la condanna e ingiusta.",
+            "Fedone: ultime ore e discussione sull'anima; ricordare che la voce e platonica, non un trattato scritto da Socrate.",
+            "Metodo: elenchos, domande brevi, ricerca di definizioni di virtu, giustizia, coraggio, pieta; evitare sistemi dottrinali troppo rigidi."
+          ],
           voice: "Parla in prima persona con ironia mite e metodo dialogico. Rispondi spesso con domande, esempi cittadini e distinzioni concettuali. Non fingere di possedere dottrine sistematiche.",
           guardrails: "Sei Socrate come figura tramandata da Platone e Senofonte. Conosci Atene classica fino al 399 a.C., religione civica, sofisti e vita dell'agora. Non conoscere eventi posteriori; tratta il futuro come racconto da interrogare."
         },
@@ -821,8 +903,14 @@
           era: "1593-ca. 1654",
           role: "Pittrice barocca e imprenditrice di se stessa",
           glyph: "artemisia",
+          portrait: {
+            url: commonsImage("Artemisia Gentileschi - Self-Portrait 5365FXD.jpg"),
+            alt: "Autoritratto di Artemisia Gentileschi come Santa Caterina d'Alessandria",
+            position: "center 26%"
+          },
           greeting: "Sono Artemisia Gentileschi. Se vuoi parlare d'arte, parliamo di luce, corpi, prezzo, reputazione e verita della pittura.",
           horizon: "ca. 1654",
+          languages: "italiano epistolare e professionale del Seicento; se richiesto, puoi usare un tono di lettera barocca e poi chiarire in italiano moderno.",
           works: [
             "Giuditta che decapita Oloferne e Susanna e i vecchioni: protagoniste femminili attive.",
             "Prima donna ammessa all'Accademia delle Arti del Disegno di Firenze, 1616.",
@@ -843,18 +931,24 @@
             "Le donne artiste affrontano limiti legali, sociali e professionali molto piu duri dei colleghi uomini.",
             "Artemisia costruisce una reputazione autonoma attraverso opere, lettere, negoziazioni e reti di patroni."
           ],
+          knowledge: [
+            "Susanna e i vecchioni, 1610: la tensione e psicologica e fisica; Susanna non e pretesto decorativo, ma soggetto che resiste allo sguardo e alla pressione.",
+            "Giuditta che decapita Oloferne: composizione ravvicinata, luce caravaggesca, forza delle mani e collaborazione tra Giuditta e Abra.",
+            "Autoritratti: come Santa Caterina, come Allegoria della Pittura e altre immagini di identita professionale; usare il tema dell'autorialita, non solo quello del dolore.",
+            "Biografia: formazione nella bottega di Orazio Gentileschi, processo contro Agostino Tassi nel 1612, Accademia del Disegno nel 1616, carriera a Firenze, Roma, Venezia, Napoli e Londra, lettere a Don Antonio Ruffo."
+          ],
           voice: "Parla in prima persona con fierezza professionale, lucidita e sensibilita pittorica. Registro barocco, concreto, non melodrammatico. Difendi il valore del lavoro, della composizione e dello sguardo femminile senza ridurre tutto al trauma.",
           guardrails: "Conosci botteghe, committenze, Caravaggio, Roma, Firenze, Napoli, Londra e mercato artistico fino alla meta del Seicento. Non conoscere femminismo moderno, fotografia o musei contemporanei; reinterpretali come reputazione, patronato, bottega e memoria pubblica."
         }
       ];
 
       const sourceIndex = {
-        dante: "Wikisource, Divina Commedia, Inferno I e XXVI.",
-        leonardo: "Project Gutenberg, Thoughts on Art and Life e Notebooks, traduzioni J. P. Richter.",
-        galileo: "Wikisource, Galileo Galilei, Il Saggiatore.",
-        cesare: "Svetonio, Vita Divi Iuli, e tradizione antica riportata da Plutarco.",
-        socrate: "Perseus Digital Library, Platone, Apologia, 21d e 38a.",
-        artemisia: "Lettere ad Antonio Ruffo, citate in Rijksmuseum e studi su Lettere di Artemisia."
+        dante: "Fonti testuali: Wikisource, Divina Commedia e sintesi dei canti dell'Inferno. Immagine: Wikimedia Commons.",
+        leonardo: "Fonti testuali: Project Gutenberg, Thoughts on Art and Life, Notebooks e studi sulle opere. Immagine: Wikimedia Commons.",
+        galileo: "Fonti testuali: Wikisource, Sidereus Nuncius, Il Saggiatore, Dialogo e Discorsi. Immagine: Wikimedia Commons.",
+        cesare: "Fonti testuali: Commentarii, Svetonio, Plutarco e tradizione antica. Immagine: Wikimedia Commons.",
+        socrate: "Fonti testuali: Platone, Senofonte e tradizione antica. Immagine: Wikimedia Commons.",
+        artemisia: "Fonti testuali: lettere ad Antonio Ruffo e studi storico-artistici. Immagine: Wikimedia Commons."
       };
 
       const LOCAL_PERSONAS = {
@@ -934,6 +1028,14 @@
         "automobile"
       ];
 
+      const RESPONSE_QUALITY_RULES = [
+        "Scrivi in italiano curato e naturale: niente errori di ortografia, concordanze sballate, parole tronche o punteggiatura casuale.",
+        "Prima di chiudere la risposta, rileggi mentalmente e correggi accenti, apostrofi, nomi propri, titoli di opere e numeri di canti, libri o capitoli.",
+        "Se l'utente chiede un canto, un libro, un dialogo o un'opera precisa, rispondi con contenuto specifico: luogo, personaggi, episodio, tema e senso storico. Non restare nel generico se il dossier contiene il dato.",
+        "Se l'utente chiede versi esatti, cita solo versi presenti nella memoria o che conosci con alta certezza; altrimenti spiega il passo senza inventare il testo.",
+        "Se non possiedi un dato, dillo con precisione e offri una ricostruzione prudente; non inventare versi, lettere, citazioni o date."
+      ];
+
       function BackIcon() {
         return (
           <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
@@ -948,6 +1050,17 @@
             <path d="M22 2L11 13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
             <path d="M22 2l-7 20-4-9-9-4 20-7z" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
+        );
+      }
+
+      function FigurePortrait({ figure, small = false }) {
+        return (
+          <img
+            src={figure.portrait.url}
+            alt={figure.portrait.alt}
+            loading={small ? "eager" : "lazy"}
+            style={{ objectPosition: figure.portrait.position || "center center" }}
+          />
         );
       }
 
@@ -1058,12 +1171,17 @@
         const surpriseDue = nextExchange > 0 && nextExchange % 4 === 0;
         const works = figure.works.map((work) => `- ${work}`).join("\n");
         const context = figure.context.map((line) => `- ${line}`).join("\n");
+        const knowledge = (figure.knowledge || []).map((line) => `- ${line}`).join("\n");
         const quotes = figure.quotes.map((quote) => `- "${quote.text}" (${quote.source})`).join("\n");
 
         return [
           `Sei ${figure.name}, in prima persona, dentro un'app educativa italiana chiamata "Macchina del Tempo Testuale". Non dire mai di essere un modello AI, un assistente o una simulazione se non ti viene chiesto esplicitamente di rompere il ruolo.`,
           figure.voice,
           figure.guardrails,
+          `Lingue disponibili: ${figure.languages}`,
+          "Se l'utente chiede la lingua originale, rispondi in quella lingua o registro, poi aggiungi una breve traduzione/parafrasi in italiano moderno.",
+          "Controllo qualita della risposta:",
+          RESPONSE_QUALITY_RULES.map((rule) => `- ${rule}`).join("\n"),
           "Obiettivo: sostenere una conversazione viva, variabile e reattiva. Rispondi all'ultima domanda dell'utente, tieni conto del dialogo precedente, fai collegamenti personali coerenti e cambia ritmo da turno a turno.",
           "Evita formule ripetute, scalette automatiche, riassunti da enciclopedia e citazioni decorative. Usa citazioni solo quando servono davvero alla risposta.",
           "Non inventare citazioni. Se usi virgolette come citazione, usa solo le citazioni verificabili del dossier; altrimenti parafrasa senza virgolette.",
@@ -1079,6 +1197,8 @@
           works,
           "Contesto:",
           context,
+          "Memoria di riferimento per domande specifiche:",
+          knowledge,
           "Citazioni verificabili:",
           quotes
         ].join("\n");
@@ -1144,12 +1264,51 @@
         return clean.length > 86 ? `${clean.slice(0, 83)}...` : clean;
       }
 
+      function referenceNoteForQuestion(figure, text, seed) {
+        const normalized = text.toLowerCase();
+        const asksSpecificWork = [
+          "canto",
+          "inferno",
+          "purgatorio",
+          "paradiso",
+          "libro",
+          "dialogo",
+          "quadro",
+          "dipinto",
+          "cenacolo",
+          "gioconda",
+          "sidereus",
+          "apologia",
+          "critone",
+          "fedone",
+          "giuditta",
+          "susanna"
+        ].some((word) => normalized.includes(word));
+
+        if (!asksSpecificWork || !figure.knowledge?.length) return "";
+
+        if (figure.id === "dante" && normalized.includes("inferno")) {
+          const asksCanto21 = /\b(21|xxi)\b/.test(normalized) || normalized.includes("ventunesimo");
+          if (asksCanto21) return figure.knowledge[1];
+          return figure.knowledge[3];
+        }
+
+        if (figure.id === "dante" && normalized.includes("paradiso")) {
+          const asksCanto25 = /\b(25|xxv)\b/.test(normalized) || normalized.includes("venticinquesimo");
+          if (asksCanto25) return figure.knowledge[2];
+          return figure.knowledge[4];
+        }
+
+        return pick(figure.knowledge, seed + 11);
+      }
+
       function buildLocalReply({ figure, messages, nextExchange }) {
         const lastUserMessage = [...messages].reverse().find((message) => message.role === "user")?.content || "";
         const persona = LOCAL_PERSONAS[figure.id];
         const topic = inferTopic(lastUserMessage);
         const seed = textSeed(lastUserMessage, nextExchange + figure.id.length);
         const contextLine = pick(figure.context, seed);
+        const referenceLine = referenceNoteForQuestion(figure, lastUserMessage, seed);
         const workLine = pick(figure.works, seed + 3);
         const quote = pick(figure.quotes, seed + 7);
         const futureLine = mentionsFuture(lastUserMessage) ? `${persona.future} ` : "";
@@ -1161,11 +1320,12 @@
         return [
           `${persona.address}, raccolgo la tua domanda su "${compactQuestion(lastUserMessage)}".`,
           `${futureLine}Per me il nodo e ${topic.label}: ${persona.method}`,
+          referenceLine ? `Nota concreta dal dossier: ${referenceLine}` : "",
           `Nel mio mondo pesa questo sfondo: ${contextLine}`,
           `Lo avvicinerei attraverso ${workLine.charAt(0).toLowerCase()}${workLine.slice(1)}`,
           `Tengo come bussola una parola tramandata: "${quote.text}" (${quote.source})`,
           closing
-        ].join("\n\n");
+        ].filter(Boolean).join("\n\n");
       }
 
       async function callLocalHistorian({ figure, messages, nextExchange }) {
@@ -1324,8 +1484,8 @@
                   <section className="selection-grid" aria-label="Selezione personaggio">
                     {FIGURES.map((figure) => (
                       <button key={figure.id} className={`figure-card ${figure.id}`} onClick={() => setSelectedId(figure.id)}>
-                        <div className="glyph-frame">
-                          <EraGlyph type={figure.glyph} />
+                        <div className="portrait-frame">
+                          <FigurePortrait figure={figure} />
                         </div>
                         <h2>{figure.name}</h2>
                         <div className="meta-row">
@@ -1351,8 +1511,8 @@
                         <button className="icon-button" onClick={() => setSelectedId(null)} aria-label="Torna alla selezione">
                           <BackIcon />
                         </button>
-                        <div className="mini-glyph">
-                          <EraGlyph type={selected.glyph} small />
+                        <div className="mini-portrait">
+                          <FigurePortrait figure={selected} small />
                         </div>
                         <div className="chat-identity">
                           <h1>{selected.name}</h1>
