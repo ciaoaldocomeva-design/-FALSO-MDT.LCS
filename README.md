@@ -5,20 +5,7 @@ Tutti i contenuti, testi, immagini, opere, progetti e materiali creativi firmati
 
 # Macchina del Tempo Testuale
 
-React Artifact standalone per dialogare con figure storiche tramite OpenRouter, con fallback locale se il modello non risponde.
-
-## Avvio locale
-
-```powershell
-node server.mjs 4173
-```
-
-Poi apri:
-
-```text
-http://127.0.0.1:4173
-```
-
+React Artifact standalone per dialogare con figure storiche tramite OpenRouter, con fallback locale se il modello non risponde.  Per questo modello la richiesta limita il ragionamento a `reasoning.max_tokens: 128` e nasconde i token di ragionamento dalla risposta: senza un limite esplicito OpenRouter puo rispondere `200 OK` ma con `message.content` vuoto, facendo scattare il fallback locale.
 ## Modello
 
 Il server usa OpenRouter con `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free`, che al momento risponde correttamente con la chiave disponibile. 
